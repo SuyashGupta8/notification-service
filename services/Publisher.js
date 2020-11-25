@@ -5,7 +5,7 @@ class Publisher {
         this.msg = msg;
     }
 
-    sendMessage(retry){
+    async sendMessage(retry){
 
         retry = retry || 0;
         axios.post('https://sendgrid', {
