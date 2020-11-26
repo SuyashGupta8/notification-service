@@ -1,0 +1,7 @@
+{
+    "config" : {
+    "pid" : "admin-project-296219", 
+    "topic" : "my-topic", 
+    "sub" : "my-sub"
+    }
+}

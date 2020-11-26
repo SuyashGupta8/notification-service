@@ -1,77 +1,20 @@
-/**
- * TODO(developer): Uncomment these variables before running the sample.
- */
-const projectId = 'YOUR_PROJECT_ID'
-const topicName = 'myTopic';
-const data = JSON.stringify({foo: 'bar'});
+// Imports the Google Cloud client library
+const {PubSub} = require('@google-cloud/pubsub');
 
-// Imports the Google Cloud client library. v1 is for the lower level
-// proto access.
-const {v1} = require('@google-cloud/pubsub');
+// Creates a client; cache this for further us
 
-// Creates a publisher client.
-const publisherClient = new v1.PublisherClient({
-  // optional auth parameters
-});
+let  projectId = 'admin-project-296219';
+const pubSubClient = new PubSub({projectId});
 
-async function publishWithRetrySettings() {
-  const formattedTopic = publisherClient.projectTopicPath(
-    projectId,
-    topicName
-  );
-
-  // Publishes the message as a string, e.g. "Hello, world!" or JSON.stringify(someObject)
-  const dataBuffer = Buffer.from(data);
-  const messagesElement = {
-    data: dataBuffer,
-  };
-  const messages = [messagesElement];
-
-  // Build the request
-  const request = {
-    topic: formattedTopic,
-    messages: messages,
-  };
-
-  // Retry settings control how the publisher handles retryable failures
-  // Default values are shown
-  const retrySettings = {
-    retryCodes: [
-      10, // 'ABORTED'
-      1, // 'CANCELLED',
-      4, // 'DEADLINE_EXCEEDED'
-      13, // 'INTERNAL'
-      8, // 'RESOURCE_EXHAUSTED'
-      14, // 'UNAVAILABLE'
-      2, // 'UNKNOWN'
-    ],
-    backoffSettings: {
-      // The initial delay time, in milliseconds, between the completion
-      // of the first failed request and the initiation of the first retrying request.
-      initialRetryDelayMillis: 100,
-      // The multiplier by which to increase the delay time between the completion
-      // of failed requests, and the initiation of the subsequent retrying request.
-      retryDelayMultiplier: 1.3,
-      // The maximum delay time, in milliseconds, between requests.
-      // When this value is reached, retryDelayMultiplier will no longer be used to increase delay time.
-      maxRetryDelayMillis: 60000,
-      // The initial timeout parameter to the request.
-      initialRpcTimeoutMillis: 5000,
-      // The multiplier by which to increase the timeout parameter between failed requests.
-      rpcTimeoutMultiplier: 1.0,
-      // The maximum timeout parameter, in milliseconds, for a request. When this value is reached,
-      // rpcTimeoutMultiplier will no longer be used to increase the timeout.
-      maxRpcTimeoutMillis: 600000,
-      // The total time, in milliseconds, starting from when the initial request is sent,
-      // after which an error will be returned, regardless of the retrying attempts made meanwhile.
-      totalTimeoutMillis: 600000,
-    },
-  };
-
-  const [response] = await publisherClient.publish(request, {
-    retry: retrySettings,
+async function listAllTopics() {
+  // Lists all topics in the current project
+  const [topics] = await pubSubClient.getTopics();
+  console.log('Topics:');
+  topics.forEach(topic => {
+      if(topic.name.includes('my-topic')){
+          topic.publish(Buffer.from('my test message!'));
+      }
   });
-  console.log(`Message ${response.messageIds} published.`);
 }
 
-publishWithRetrySettings().catch(console.error);
+listAllTopics().catch(console.error);

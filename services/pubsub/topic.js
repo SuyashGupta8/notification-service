@@ -1,18 +1,37 @@
-/**
- * TODO(developer): Uncomment this variable before running the sample.
- */
-// const topicName = 'YOUR_TOPIC_NAME';
+const {PubSub} = require('@google-cloud/pubsub'),
+data = require('./config.json').config;
 
-// Imports the Google Cloud client library
-const {PubSub} = require('@google-cloud/pubsub');
+async function quickstart( projectId, topicName, subscriptionName) {
 
-// Creates a client; cache this for further use
-const pubSubClient = new PubSub();
+  const pubsub = new PubSub({projectId});
 
-async function createTopic() {
   // Creates a new topic
-  await pubSubClient.createTopic(topicName);
-  console.log(`Topic ${topicName} created.`);
+  console.log('topic name '+ topicName);
+  const [topic] = await pubsub.createTopic(topicName);
+
+  // Creates a subscription on that new topic
+  /*const [subscription] = await topic.createSubscription(subscriptionName);
+
+  // Receive callbacks for new messages on the subscription
+  subscription.on('message', message => {
+    console.log('Received message:', message.data.toString());
+    process.exit(0);
+  });
+
+  // Receive callbacks for errors on the subscription
+  subscription.on('error', error => {
+    console.error('Received error:', error);
+    process.exit(1);
+  }); */
+
+  // Send a message to the topic
+  topic.publish(Buffer.from('Test message!'));
 }
 
-createTopic();
+quickstart(data.pid, data.topic,  data.sub).then(res =>{
+    console.log(`Topic ${data.pid} successfully created `);
+}).catch(err =>{
+    console.log( ` while creating topic ${data.pid} error obtained: `+ err);
+})
+
+
